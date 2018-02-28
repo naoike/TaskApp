@@ -9,9 +9,10 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.AdapterView;
-
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
@@ -31,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
 
     private ListView mListView;
     private TaskAdapter mTaskAdapter;
+
+    private Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,16 +119,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        reloadListView();
-
-
-
-        //
-
-
-
-
-
+        findViewById(R.id.button).setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v){
+                    reloadListView();
+           }
+        });
 
 
 
@@ -133,6 +132,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void reloadListView() {
+
+        String search = ((EditText)findViewById(R.id.editText )).getText().toString();
+
+        // Realm DBから全てのデータを日付順で取得,
+        RealmResults<Task> mTaskRealmResults;
+        if(search.length() > 0){
+            mTaskRealmResults = mRealm.where(Task.class).contains("category",search).findAllSorted("date", Sort.DESCENDING);
+        } else {
+            mTaskRealmResults = mRealm.where(Task.class).findAllSorted("date", Sort.DESCENDING);
+        }
+
         // Realmデータベースから、「全てのデータを取得して新しい日時順に並べた結果」を取得
         RealmResults<Task> taskRealmResults = mRealm.where(Task.class).findAllSorted("date", Sort.DESCENDING);
         // 上記の結果を、TaskList としてセットする
