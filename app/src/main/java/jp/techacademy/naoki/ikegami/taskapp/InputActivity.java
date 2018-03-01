@@ -152,7 +152,6 @@ public class InputActivity extends AppCompatActivity {
 
         String title = mTitleEdit.getText().toString();
         String content = mContentEdit.getText().toString();
-
         String category = mCategoryEdit.getText().toString();   //課題
 
         mTask.setCategory(category);                         // 課題

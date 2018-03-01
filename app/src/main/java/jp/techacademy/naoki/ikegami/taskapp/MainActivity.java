@@ -32,13 +32,13 @@ public class MainActivity extends AppCompatActivity {
 
     private ListView mListView;
     private TaskAdapter mTaskAdapter;
-
     private Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -119,44 +119,60 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.button).setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View v){
-                    reloadListView();
-           }
+
+        button  = (Button) findViewById(R.id.button);                //課題　カテゴリー　絞込み
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                reloadListView();
+            }
         });
 
 
+        reloadListView();
+
+        }
 
 
-    }
+
+
 
     private void reloadListView() {
 
         String search = ((EditText)findViewById(R.id.editText )).getText().toString();
 
-        // Realm DBから全てのデータを日付順で取得,
-        RealmResults<Task> mTaskRealmResults;
+
+
         if(search.length() > 0){
-            mTaskRealmResults = mRealm.where(Task.class).contains("category",search).findAllSorted("date", Sort.DESCENDING);
+            RealmResults<Task> taskRealmResults = mRealm.where(Task.class).contains("category",search).findAllSorted("date", Sort.DESCENDING);
+            // 上記の結果を、TaskList としてセットする
+            mTaskAdapter.setTaskList(mRealm.copyFromRealm(taskRealmResults));
+            // TaskのListView用のアダプタに渡す
+            mListView.setAdapter(mTaskAdapter);
+            // 表示を更新するために、アダプターにデータが変更されたことを知らせる
+            mTaskAdapter.notifyDataSetChanged();
+
         } else {
-            mTaskRealmResults = mRealm.where(Task.class).findAllSorted("date", Sort.DESCENDING);
+            RealmResults<Task> taskRealmResults = mRealm.where(Task.class).findAllSorted("date", Sort.DESCENDING);
+            // 上記の結果を、TaskList としてセットする
+            mTaskAdapter.setTaskList(mRealm.copyFromRealm(taskRealmResults));
+            // TaskのListView用のアダプタに渡す
+            mListView.setAdapter(mTaskAdapter);
+            // 表示を更新するために、アダプターにデータが変更されたことを知らせる
+            mTaskAdapter.notifyDataSetChanged();
+
+
         }
 
-        // Realmデータベースから、「全てのデータを取得して新しい日時順に並べた結果」を取得
-        RealmResults<Task> taskRealmResults = mRealm.where(Task.class).findAllSorted("date", Sort.DESCENDING);
-        // 上記の結果を、TaskList としてセットする
-        mTaskAdapter.setTaskList(mRealm.copyFromRealm(taskRealmResults));
-        // TaskのListView用のアダプタに渡す
-        mListView.setAdapter(mTaskAdapter);
-        // 表示を更新するために、アダプターにデータが変更されたことを知らせる
-        mTaskAdapter.notifyDataSetChanged();
     }
+
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
         mRealm.close();
+
     }
 }
